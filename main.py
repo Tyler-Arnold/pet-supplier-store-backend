@@ -32,12 +32,12 @@ CORS(app)
 
 items = [
     {
-        'id': 1,
+        'itemId': 1,
         'title': u'Cat Food',
         'description': u'It\'s cat food'
     },
     {
-        'id': 2,
+        'itemId': 2,
         'title': u'Dog Food',
         'description': u'It\'s dog food'
     }
