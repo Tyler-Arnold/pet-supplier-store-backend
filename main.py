@@ -139,7 +139,15 @@ def not_found(error):
 @app.route('/api/stock/<int:stock_id>', methods=['PUT'])
 @auth.login_required
 def update_stock(stock_id):
-    stock = [stock for stock in items if stock['id'] == stock_id]
+    limit = 1
+    query = datastore_client.query(kind='item')
+    query.add_filter('itemId', '=', stock_id)
+
+    highest_id = query.fetch(limit=limit)
+    stock = ''
+    for item in highest_id:
+        if item['itemId'] == stock_id:
+            stock = item
     if len(stock) == 0:
         abort(404)
     if not request.json:
@@ -150,12 +158,18 @@ def update_stock(stock_id):
         abort(400)
     if 'done' in request.json and type(request.json['done']) is not bool:
         abort(400)
-    stock[0]['title'] = request.json.get('title', stock[0]['title'])
-    stock[0]['description'] = request.json.get('description', stock[0]['description'])
-    stock[0]['price'] = request.json.get('price', stock[0]['price'])
-    stock[0]['imageUri'] = request.json.get('imageUri', stock[0]['imageUri'])
 
-    return jsonify({'task': [make_public_stock(item) for item in stock[0]]})
+    entity = datastore.Entity(key=datastore_client.key('item'))
+    newItem = entity.get(item.key)
+
+    newItem['title'] = request.json.get('title', newItem['title'])
+    newItem['description'] = request.json.get('description', newItem['description'])
+    newItem['price'] = request.json.get('price', newItem['price'])
+    newItem['imageUri'] = request.json.get('imageUri', newItem['imageUri'])
+
+    datastore_client.put(newItem)
+
+    return jsonify(newItem), 201
 
 
 @app.route('/api/stock/<int:stock_id>', methods=['DELETE'])
