@@ -160,7 +160,7 @@ def update_stock(stock_id):
         abort(400)
 
     entity = datastore.Entity(key=datastore_client.key('item'))
-    newItem = entity.get(item.key)
+    newItem = entity.get(stock.key)
 
     newItem['title'] = request.json.get('title', newItem['title'])
     newItem['description'] = request.json.get('description', newItem['description'])
