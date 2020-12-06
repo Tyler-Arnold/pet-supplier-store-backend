@@ -22,12 +22,14 @@ from google.cloud import datastore
 import google.oauth2.id_token
 from idna import unicode
 from flask_httpauth import HTTPTokenAuth
+from google.cloud import datastore
 
 auth = HTTPTokenAuth(scheme='Bearer')
 
 firebase_request_adapter = requests.Request()
 
 app = Flask(__name__)
+datastore_client = datastore.Client()
 CORS(app)
 
 items = [
@@ -83,13 +85,16 @@ def make_public_stock(stock):
 
 
 @app.route('/api/stock', methods=['GET'])
-@auth.login_required
 def get_stock():
-    return jsonify({'stock': [make_public_stock(item) for item in items]})
+    limit = 50
+    query = datastore_client.query(kind='item')
+    query.order = ['-title']
+
+    stock = query.fetch(limit=limit)
+    return jsonify({'stock': [make_public_stock(item) for item in stock]})
 
 
 @app.route('/api/stock/<int:stock_id>', methods=['GET'])
-@auth.login_required
 def get_item(stock_id):
     stock = [stock for stock in items if stock['id'] == stock_id]
     if len(stock) == 0:
@@ -108,9 +113,12 @@ def create_item():
         'description': request.json['description'],
         'price': request.json['price'],
         'imageUri': request.json['imageUri']
-
     }
-    items.append(stock)
+
+    entity = datastore.Entity(key=datastore_client.key('item'))
+    entity.update(stock)
+
+    datastore_client.put(entity)
     return jsonify({'stock': [make_public_stock(item) for item in stock]}), 201
 
 
