@@ -77,8 +77,7 @@ def make_public_stock(stock):
     for field in stock:
         if field == 'itemId':
             new_stock['uri'] = url_for('get_stock', stock_id=stock['itemId'], _external=True)
-        else:
-            new_stock[field] = stock[field]
+        new_stock[field] = stock[field]
     return new_stock
 
 
