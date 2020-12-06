@@ -110,7 +110,7 @@ def create_item():
     query = datastore_client.query(kind='item')
     query.order = ['-itemId']
 
-    highest_id = query.fetch(limit=limit)
+    highest_id = query.fetch(limit=limit)[0]
 
     stock = {
         'itemId': highest_id['itemId'] + 1,
