@@ -160,18 +160,17 @@ def update_stock(stock_id):
         abort(400)
 
     entity = datastore.Entity(key=datastore_client.key('item'))
-    newItem = entity.get(stock.key)
-    entity.update(newItem)
-    newItem = {
-        'title': request.json.get('title', newItem['title']),
-        'description': request.json.get('description', newItem['description']),
-        'price': request.json.get('price', newItem['price']),
-        'imageUri': request.json.get('imageUri', newItem['imageUri']),
+    entity.get(stock.key)
+    new_item = {
+        'title': request.json.get('title'),
+        'description': request.json.get('description'),
+        'price': request.json.get('price'),
+        'imageUri': request.json.get('imageUri'),
     }
-    entity.update(newItem)
+    entity.update(new_item)
     datastore_client.put(entity)
 
-    return jsonify(newItem), 201
+    return jsonify(new_item), 201
 
 
 @app.route('/api/stock/<int:stock_id>', methods=['DELETE'])
