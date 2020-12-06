@@ -34,17 +34,15 @@ CORS(app)
 
 items = [
     {
-        'itemId': 1,
         'title': u'Cat Food',
         'description': u'It\'s cat food',
-        'price': 4.99,
+        'price': '4.99',
         'imageUri': ''
     },
     {
-        'itemId': 2,
         'title': u'Dog Food',
         'description': u'It\'s dog food',
-        'price': 5.99,
+        'price': '5.99',
         'imageUri': ''
     }
 ]
@@ -77,8 +75,8 @@ def unauthorized(error):
 def make_public_stock(stock):
     new_stock = {}
     for field in stock:
-        if field == 'id':
-            new_stock['uri'] = url_for('get_stock', stock_id=stock['id'], _external=True)
+        if field == 'itemId':
+            new_stock['uri'] = url_for('get_stock', stock_id=stock['itemId'], _external=True)
         else:
             new_stock[field] = stock[field]
     return new_stock
@@ -107,8 +105,15 @@ def get_item(stock_id):
 def create_item():
     if not request.json or not 'title' in request.json:
         abort(400)
+
+    limit = 1
+    query = datastore_client.query(kind='item')
+    query.order = ['-itemId']
+
+    highest_id = query.fetch(limit=limit)
+
     stock = {
-        'itemId': items[-1]['itemId'] + 1,
+        'itemId': highest_id['itemId'] + 1,
         'title': request.json['title'],
         'description': request.json['description'],
         'price': request.json['price'],
@@ -119,7 +124,7 @@ def create_item():
     entity.update(stock)
 
     datastore_client.put(entity)
-    return jsonify({'stock': [make_public_stock(item) for item in stock]}), 201
+    return jsonify(stock), 201
 
 
 @app.errorhandler(404)
