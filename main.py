@@ -108,7 +108,7 @@ def create_item():
     if not request.json or not 'title' in request.json:
         abort(400)
     stock = {
-        'id': items[-1]['id'] + 1,
+        'itemId': items[-1]['itemId'] + 1,
         'title': request.json['title'],
         'description': request.json['description'],
         'price': request.json['price'],
