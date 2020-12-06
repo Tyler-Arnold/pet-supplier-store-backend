@@ -34,12 +34,16 @@ items = [
     {
         'itemId': 1,
         'title': u'Cat Food',
-        'description': u'It\'s cat food'
+        'description': u'It\'s cat food',
+        'price': 4.99,
+        'imageUri': ''
     },
     {
         'itemId': 2,
         'title': u'Dog Food',
-        'description': u'It\'s dog food'
+        'description': u'It\'s dog food',
+        'price': 5.99,
+        'imageUri': ''
     }
 ]
 
@@ -95,13 +99,16 @@ def get_item(stock_id):
 
 @app.route('/api/stock', methods=['POST'])
 @auth.login_required
-def create_task():
+def create_item():
     if not request.json or not 'title' in request.json:
         abort(400)
     stock = {
         'id': items[-1]['id'] + 1,
         'title': request.json['title'],
-        'description': request.json.get('description', ""),
+        'description': request.json['description'],
+        'price': request.json['price'],
+        'imageUri': request.json['imageUri']
+
     }
     items.append(stock)
     return jsonify({'stock': [make_public_stock(item) for item in stock]}), 201
@@ -128,17 +135,20 @@ def update_stock(stock_id):
         abort(400)
     stock[0]['title'] = request.json.get('title', stock[0]['title'])
     stock[0]['description'] = request.json.get('description', stock[0]['description'])
-    stock[0]['done'] = request.json.get('done', stock[0]['done'])
+    stock[0]['price'] = request.json.get('price', stock[0]['price'])
+    stock[0]['imageUri'] = request.json.get('imageUri', stock[0]['imageUri'])
+
     return jsonify({'task': [make_public_stock(item) for item in stock[0]]})
 
 
 @app.route('/api/stock/<int:stock_id>', methods=['DELETE'])
 @auth.login_required
-def delete_task(stock_id):
+def delete_item(stock_id):
     stock = [stock for stock in items if stock['id'] == stock_id]
     if len(stock) == 0:
         abort(404)
     items.remove(stock[0])
+
     return jsonify({'result': True})
 
 
