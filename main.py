@@ -161,13 +161,15 @@ def update_stock(stock_id):
 
     entity = datastore.Entity(key=datastore_client.key('item'))
     newItem = entity.get(stock.key)
-
-    newItem['title'] = request.json.get('title', newItem['title'])
-    newItem['description'] = request.json.get('description', newItem['description'])
-    newItem['price'] = request.json.get('price', newItem['price'])
-    newItem['imageUri'] = request.json.get('imageUri', newItem['imageUri'])
-
-    datastore_client.put(newItem)
+    entity.update(newItem)
+    newItem = {
+        'title': request.json.get('title', newItem['title']),
+        'description': request.json.get('description', newItem['description']),
+        'price': request.json.get('price', newItem['price']),
+        'imageUri': request.json.get('imageUri', newItem['imageUri']),
+    }
+    entity.update(newItem)
+    datastore_client.put(entity)
 
     return jsonify(newItem), 201
 
